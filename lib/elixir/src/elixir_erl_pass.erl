@@ -483,10 +483,15 @@ translate_map(Meta, Assocs, TUpdate, #elixir_erl{extra=Extra} = S) ->
   {Op, KeyFun, ValFun} = translate_key_val_op(TUpdate, S),
   Ann = ?ann(Meta),
 
-  {TArgs, SA} = lists:mapfoldl(fun({Key, Value}, Acc0) ->
-    {TKey, Acc1} = KeyFun(Key, Acc0),
-    {TValue, Acc2} = ValFun(Value, Acc1#elixir_erl{extra=Extra}),
-    {{Op, ?ann(Meta), TKey, TValue}, Acc2}
+  {TArgs, SA} = lists:mapfoldl(fun(
+    {Key, Value}, Acc0) ->
+      {TKey, Acc1} = KeyFun(Key, Acc0),
+      {TValue, Acc2} = ValFun(Value, Acc1#elixir_erl{extra=Extra}),
+      {{Op, ?ann(Meta), TKey, TValue}, Acc2};
+    ({Name, _, _} = Key, Acc0) ->
+      {TKey, Acc1} = translate(Name, Acc0#elixir_erl{extra=map_key}),
+      {TValue, Acc2} = ValFun(Key, Acc1#elixir_erl{extra=Extra}),
+      {{Op, ?ann(Meta), TKey, TValue}, Acc2}
   end, S, Assocs),
 
   build_map(Ann, TUpdate, TArgs, SA).

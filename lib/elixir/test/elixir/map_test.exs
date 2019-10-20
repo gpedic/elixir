@@ -26,6 +26,11 @@ defmodule MapTest do
     assert a == 1
   end
 
+  test "maps with variables as key" do
+    a = 0
+    assert %{a: ^a} = %{a}
+  end
+
   test "maps with generated variables in key" do
     assert %{"#{1}" => 1} == %{"1" => 1}
     assert %{for(x <- 1..3, do: x) => 1} == %{[1, 2, 3] => 1}
